@@ -27,13 +27,13 @@ namespace AI_Studio
         [Category("General")]
         [DisplayName("Language Model")]
         [Description("Chat language model")]
-        [DefaultValue(ChatLanguageModel.ChatGPTTurbo)]
-        public ChatLanguageModel LanguageModel { get; set; } = ChatLanguageModel.ChatGPTTurbo;
+        [DefaultValue(ChatLanguageModel.GPT4_Turbo)]
+        public ChatLanguageModel LanguageModel { get; set; } = ChatLanguageModel.GPT4_Turbo;
 
         [Category("General")]
         [DisplayName("API Endpoint")]
         [Description("URL containing the OpenAI API endpoint and request format ({0}=version, {1}=request)")]
-        [DefaultValue("https://api.openai.com/{0}/{1}")]
-        public string ApiEndpoint { get; set; } = "https://api.openai.com/{0}/{1}";
+        [DefaultValue("https://api.openai.com/v1")]
+        public string ApiEndpoint { get; set; } = "https://api.openai.com/v1";
     }
 }

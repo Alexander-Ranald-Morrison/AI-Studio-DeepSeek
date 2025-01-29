@@ -1,9 +1,11 @@
 ﻿using EnvDTE;
 using Microsoft.VisualStudio.Shell.Interop;
 using Microsoft.VisualStudio.Text;
-using OpenAI_API;
-using OpenAI_API.Chat;
-using OpenAI_API.Models;
+using OpenAI;
+using OpenAI.Chat;
+using System.ClientModel;
+
+//using OpenAI_API.Models;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -63,40 +65,37 @@ namespace AI_Studio
                 text = $"{docView.TextView.TextDataModel.ContentType.DisplayName}\n{text}";
             }
 
-            var api = new OpenAIAPI(generalOptions.ApiKey)
+            OpenAIClientOptions options = new()
             {
                 // Set endpoint from the settings
-                ApiUrlFormat = generalOptions.ApiEndpoint
+                Endpoint = new Uri(generalOptions.ApiEndpoint)
             };
-
-            var chatRequestTemplate = new ChatRequest()
+            string model =  generalOptions.LanguageModel switch
             {
-                Model = generalOptions.LanguageModel switch
-                {
-                    ChatLanguageModel.GPT4 => Model.GPT4,
-                    ChatLanguageModel.GPT4_32k_Context => Model.GPT4_32k_Context,
-                    ChatLanguageModel.GPT4_Turbo => Model.GPT4_Turbo,
-                    ChatLanguageModel.GPT4o => new Model("gpt-4o") { OwnedBy = "openai" },
-                    _ => Model.ChatGPTTurbo
-                }
+                ChatLanguageModel.GPT4 => "gpt-4",
+                ChatLanguageModel.GPT4_Turbo => "gpt-4-turbo",
+                ChatLanguageModel.GPT4o => "gpt-4o",
+                _ => "gpt-4-turbo"
             };
-            var chat = api.Chat.CreateConversation(chatRequestTemplate);
-
-            chat.AppendSystemMessage(SystemMessage);
-            chat.AppendUserInput(text);
+            ApiKeyCredential apiKey = new(generalOptions.ApiKey);
+            ChatClient client = new(model, apiKey, options);
+            List<ChatMessage> messages = [
+                new SystemChatMessage(SystemMessage),
+                new UserChatMessage(text)
+                ];;
             if (!string.IsNullOrEmpty(UserInput))
             {
-                chat.AppendUserInput(UserInput);
+                messages.Add(new UserChatMessage(UserInput));
             }
             foreach (var input in AssistantInputs)
             {
-                chat.AppendUserInput(input);
+                messages.Add(new UserChatMessage(input));
             }
 
             try
-            {
-                string response = await chat.GetResponseFromChatbotAsync();
-                
+            {   
+                ChatCompletion completion = await client.CompleteChatAsync(messages);
+                string response = completion.Content[0].Text;
                 if (_stripResponseMarkdownCode)
                 {
                     response = StripResponseMarkdownCode(response);
