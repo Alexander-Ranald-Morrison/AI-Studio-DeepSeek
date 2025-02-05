@@ -14,11 +14,13 @@ namespace AI_Studio
     [ProvideOptionPage(typeof(OptionsProvider.GeneralOptions), "AI Studio", "General", 0, 0, true, SupportsProfiles = true)]
     [ProvideOptionPage(typeof(OptionsProvider.UnitTestsOptions), "AI Studio", "Unit Test", 1, 1, true, SupportsProfiles = true)]
     [ProvideOptionPage(typeof(OptionsProvider.CommandsOptions), "AI Studio", "Commands", 2, 2, true, SupportsProfiles = true)]
+    [ProvideToolWindow(typeof(AI_Studio.ChatWindow.ChatWindow))]
     public sealed class AIStudioPackage : ToolkitPackage
     {
         protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
         {
             await this.RegisterCommandsAsync();
+            await AI_Studio.ChatWindow.ChatWindowCommand.InitializeAsync(this);
         }
     }
 }

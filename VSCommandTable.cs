@@ -14,6 +14,12 @@ namespace AI_Studio
     {
         public const string AI_StudioString = "2dd7016f-e0cf-41b5-bc1a-ca24bd6b9662";
         public static Guid AI_Studio = new Guid(AI_StudioString);
+
+        public const string guidAIStudioPackageCmdSetString = "c5d38240-1386-4b1c-8749-dcc909d58e0b";
+        public static Guid guidAIStudioPackageCmdSet = new Guid(guidAIStudioPackageCmdSetString);
+
+        public const string guidImagesString = "03bbd249-146e-4149-83d1-5114ba7f8392";
+        public static Guid guidImages = new Guid(guidImagesString);
     }
     /// <summary>
     /// Helper class that encapsulates all CommandIDs uses across VS Package.
@@ -30,5 +36,12 @@ namespace AI_Studio
         public const int Explain = 0x0004;
         public const int CodeIt = 0x0005;
         public const int SecurityCheck = 0x0006;
+        public const int cmdidChatWindowCommand = 0x0100;
+        public const int bmpPic1 = 0x0001;
+        public const int bmpPic2 = 0x0002;
+        public const int bmpPicSearch = 0x0003;
+        public const int bmpPicX = 0x0004;
+        public const int bmpPicArrows = 0x0005;
+        public const int bmpPicStrikethrough = 0x0006;
     }
 }
