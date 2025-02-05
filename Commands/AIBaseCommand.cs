@@ -5,7 +5,6 @@ using OpenAI;
 using OpenAI.Chat;
 using System.ClientModel;
 
-//using OpenAI_API.Models;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -75,6 +74,8 @@ namespace AI_Studio
                 ChatLanguageModel.GPT4 => "gpt-4",
                 ChatLanguageModel.GPT4_Turbo => "gpt-4-turbo",
                 ChatLanguageModel.GPT4o => "gpt-4o",
+                ChatLanguageModel.Deepseek_V3 => "deepseek-chat",
+                ChatLanguageModel.Deepseek_R1 => "deepseek-reasoner",
                 _ => "gpt-4-turbo"
             };
             ApiKeyCredential apiKey = new(generalOptions.ApiKey);
