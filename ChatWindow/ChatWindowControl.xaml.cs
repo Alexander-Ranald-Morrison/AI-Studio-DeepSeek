@@ -52,6 +52,11 @@ namespace AI_Studio.ChatWindow
             ChatLog.Inlines.Add(new System.Windows.Documents.Run($"{sender}: {message}\n"));
         }
 
+        private void AppendMessage(string message)
+        {
+            ChatLog.Inlines.Add(new System.Windows.Documents.Run($"{message}"));
+        }
+
         private async Task ProcessAIResponseAsync()
         {
             isProcessing = true;
@@ -85,6 +90,7 @@ namespace AI_Studio.ChatWindow
 
                 // Stream the AI response
                 AsyncCollectionResult<StreamingChatCompletionUpdate> completionUpdates = client.CompleteChatStreamingAsync(messages);
+                AppendMessage("Assistant: ");
                 await foreach (StreamingChatCompletionUpdate completionUpdate in completionUpdates)
                 {
                     
@@ -93,13 +99,13 @@ namespace AI_Studio.ChatWindow
                         responseBuilder.Append(completionUpdate.ContentUpdate[0].Text);
                         await Dispatcher.InvokeAsync(() =>
                         {
-                            //AppendMessage("Assistant", completionUpdate.ContentUpdate[0].Text);
+                            AppendMessage(completionUpdate.ContentUpdate[0].Text);
                         }, DispatcherPriority.Background);
                     }
                 }
-
+                AppendMessage("\n");
                 var assistantMessage = responseBuilder.ToString();
-                AppendMessage("Assistant", assistantMessage);
+                //AppendMessage("Assistant", assistantMessage);
                 messages.Add(new AssistantChatMessage(assistantMessage));
             }
             catch (Exception ex)
