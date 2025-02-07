@@ -10,6 +10,7 @@ using System.ClientModel;
 using EnvDTE;
 using Microsoft.VisualStudio.Shell;
 using System.Windows.Threading;
+using OpenAI;
 
 namespace AI_Studio.ChatWindow
 {
@@ -53,7 +54,62 @@ namespace AI_Studio.ChatWindow
 
         private async Task ProcessAIResponseAsync()
         {
-            return;
+            isProcessing = true;
+            try
+            {
+                var generalOptions = await General.GetLiveInstanceAsync();
+                if (string.IsNullOrEmpty(generalOptions.ApiKey))
+                {
+                    AppendMessage("System", "API Key is missing. Please set it in the options.");
+                    return;
+                }
+
+                string model = generalOptions.LanguageModel switch
+                {
+                    ChatLanguageModel.GPT4 => "gpt-4",
+                    ChatLanguageModel.GPT4_Turbo => "gpt-4-turbo",
+                    ChatLanguageModel.GPT4o => "gpt-4o",
+                    ChatLanguageModel.Deepseek_V3 => "deepseek-chat",
+                    ChatLanguageModel.Deepseek_R1 => "deepseek-reasoner",
+                    _ => "gpt-4-turbo"
+                };
+
+                var apiKey = new ApiKeyCredential(generalOptions.ApiKey);
+                var options = new OpenAIClientOptions
+                {
+                    Endpoint = new Uri(generalOptions.ApiEndpoint)
+                };
+                var client = new ChatClient(model, apiKey, options);
+
+                var responseBuilder = new StringBuilder();
+
+                // Stream the AI response
+                AsyncCollectionResult<StreamingChatCompletionUpdate> completionUpdates = client.CompleteChatStreamingAsync(messages);
+                await foreach (StreamingChatCompletionUpdate completionUpdate in completionUpdates)
+                {
+                    
+                    if (completionUpdate.ContentUpdate.Count > 0)
+                    {
+                        responseBuilder.Append(completionUpdate.ContentUpdate[0].Text);
+                        await Dispatcher.InvokeAsync(() =>
+                        {
+                            //AppendMessage("Assistant", completionUpdate.ContentUpdate[0].Text);
+                        }, DispatcherPriority.Background);
+                    }
+                }
+
+                var assistantMessage = responseBuilder.ToString();
+                AppendMessage("Assistant", assistantMessage);
+                messages.Add(new AssistantChatMessage(assistantMessage));
+            }
+            catch (Exception ex)
+            {
+                AppendMessage("Error", ex.Message);
+            }
+            finally
+            {
+                isProcessing = false;
+            }
         }
 
     }
